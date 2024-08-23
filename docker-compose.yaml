@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  nginx-server:
+    container_name: nginx-server
+    build:
+      context: .
+      dockerfile: dockerfile.nginx-server
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - streamlit  
+    volumes:
+      - ./nginx/nginx-server.crt:/etc/nginx/ssl/nginx-server.crt
+      - ./nginx/nginx-server.key:/etc/nginx/ssl/nginx-server.key
+    networks:
+      - iris-network  
+
+  flask:
+    container_name: flask
+    build:
+      context: .
+      dockerfile: dockerfile.flask
+    ports:
+      - "5000:5000"
+    networks:
+      - iris-network
+      
+  streamlit:
+    container_name: streamlit
+    build:
+      context: .
+      dockerfile: dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    depends_on:
+      - flask
+    networks:
+      - iris-network
+
+networks:
+  iris-network:
+    driver: bridge
